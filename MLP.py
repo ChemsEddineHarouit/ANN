@@ -20,9 +20,10 @@ to create a MLP we need :   X (data) D(desired output) neurons_Hi(list of number
                             b1, b2, b3 are the biases (we integrate b in the first column of W)
                             W are initialized in random numbers while the b are initialized with 0
                             C stands for Couche and that represents the layers of the MLP
-the feedforward is calculated as : C(i) = sigmoid(W(i)*C(i-1) + b(i)) and C(0) = X the input data
-                            but while the b is integrated in W we just need to calculate C(i) = sigmoid(W(i)*C(i-1))
-                            but we have to add a row in C(i-1) before each operation
+the feedforward is calculated as : 
+                            C(i) = sigmoid(W(i)*C(i-1) + b(i)) and C(0) = X the input data
+                                but while the b is integrated in W we just need to calculate C(i) = sigmoid(W(i)*C(i-1))
+                                and we have to add a row in C(i-1) before each operation
 the backward prop is calculated as:
                             dZ(i) refers to the error of the layer "i" / C(i) = sigmoid(Z(i)) but we don't use this formula
                                 dZ(i) = W(i).T * dZ(i+1) * sigmoid_derivative(C(i)) with dZ(last layer) = D - Y
