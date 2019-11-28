@@ -5,11 +5,11 @@ from MLP_2Layers import MLP as MLP2
 
 #Read Data
 dataFrame = datasets.load_iris()
-# For digits dataset
-dataFrame = datasets.load_digits()
+# For digits dataset uncomment the following line
+# dataFrame = datasets.load_digits()
 
-X = dataFrame.data
-D = dataFrame.target
+X = dataFrame.get('data')
+D = dataFrame.get('target')
 
 
 
