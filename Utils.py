@@ -1,6 +1,5 @@
 import numpy as np 
 
-
 def tanh(x):
     return np.tanh(x)
 
@@ -8,9 +7,7 @@ def sigmoid_deriv(x):
     return x*(1-x)
 
 def sigmoid(x):
-    y = 1/(1- np.exp(-x))
-    # print(x, y)
-    return y
+    return 1 / (1 + np.exp(-x * 1.0))
             
 def add_1_r(matrix):
     l = np.shape(matrix)[1]
@@ -31,3 +28,15 @@ def rem_1st_c(matrix):
 def rem_1st_r(matrix):
     new = matrix[1:, :]
     return new
+
+
+def printShapes(s, A, dict = False):
+    print(s, end='   ')
+    if(dict):
+        for k in A.keys():
+            print('%d '%(k+1), A[k].shape, ' ', end='')
+        print('')
+    else:
+        for a in A:
+            print(a.shape, ' ', end='')
+        print('')

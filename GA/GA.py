@@ -6,10 +6,10 @@ mutation_prob   = 0.05
 crossover_prob  = 0.7
 min_weight = -10
 max_weight = 10
-MAX_Opt = 1000000
 nb_population = 8
 class GA:
 
+    best_fitness = 0
     def __init__(self, mlp):
         W1, W2 = mlp.getAllParams()
         self.mlp = mlp
@@ -61,7 +61,18 @@ class GA:
         W1, W2 = self.chromosome_to_matrix(chromosome)
         self.mlp.setAllParams(W1, W2)
         self.mlp.forward_propagation()
-        return MAX_Opt - self.mlp.calc_error() 
+        Y = np.round(np.squeeze(self.mlp.Y))
+        D = np.squeeze(self.mlp.D)
+        nbTrue = 0
+        for i in range(len(D)):
+            result = Y[i] == D[i]
+            if(result):
+                nbTrue += 1 
+        fitness = 100*(nbTrue / len(D))
+        if (fitness > self.best_fitness):
+            self.best_fitness = fitness
+        print('best fitness is %d : actual fitness is %d'%(self.best_fitness, fitness))
+        return fitness
 
 
     def calcul_fitness_table(self, population):

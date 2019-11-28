@@ -52,53 +52,38 @@ Matrices Shapes:
 """
 
 class MLP:
-    
+    MAX_ITER    = 5000
+    learning_rate = np.exp(-10)
     costs = []
     accus = []
-    W = []
-    C = []
 
 
-    def __init__(self, X, D, neurons_hidden_list, r=0.1, MAX_ITER = 1000):
-        self.learning_rate = r
-        self.MAX_ITER = MAX_ITER    
+    def __init__(self, X, D):
         self.X           = X.T
         neurons_in       = X.shape[1]
         neurons_ou       = 1
-        neurons = neurons_hidden_list
-        neurons.append(neurons_ou)
+        neurons_h1       = 3
+        neurons_h2       = 5
 
-        for i, nb_neurons_out_of_layer in enumerate(neurons_hidden_list):
-            nb_neurons_in_of_layer = 0
-            if(i == 0):
-                nb_neurons_in_of_layer = neurons_in
-            elif (i == len(neurons_hidden_list)):
-                nb_neurons_in_of_layer = neurons_ou
-            else:
-                nb_neurons_in_of_layer = neurons_hidden_list[i-1]
-            W    = np.random.rand(nb_neurons_out_of_layer,nb_neurons_in_of_layer)
-            b    = np.zeros((nb_neurons_out_of_layer, 1))
-            self.W.insert(i, np.c_[b, W]) 
+        W1    = np.random.rand(neurons_h1, neurons_in)
+        W2    = np.random.rand(neurons_h2, neurons_h1)
+        W3    = np.random.rand(neurons_ou, neurons_h2)
+        b1    = np.zeros((neurons_h1, 1))
+        b2    = np.zeros((neurons_h2, 1))
+        b3    = np.zeros((neurons_ou, 1))
+        self.W1    = np.c_[b1, W1]
+        self.W2    = np.c_[b2, W2]
+        self.W3    = np.c_[b3, W3]
 
         self.D           = D
-
-
         self.Y          = np.zeros(self.D.shape)
-        print(' ANN : %s'%(neurons_hidden_list))
-        print(' Data : X:%s and D:%s'%(X.shape, D.shape))
-        print(' Weights : ', end='')
-        printShapes('W', self.W)
-        print('\n------------------')
 
     def feedforward(self):
-        for i, w in enumerate(self.W):
-            layer_in = None
-            if(i == 0):
-                layer_in = self.X
-            else:
-                layer_in = self.C[i-1]
-            self.C.insert(i, sigmoid(np.dot(w, add_1_r(layer_in))))
-        self.Y = self.C[-1]
+        self.C1 = sigmoid(np.dot(self.W1, add_1_r(self.X)))
+        self.C2 = sigmoid(np.dot(self.W2, add_1_r(self.C1)))
+        self.C3 = sigmoid(np.dot(self.W3, add_1_r(self.C2)))
+        self.Y = self.C3
+
 
     def calc_cost(self, err):
         cost = 0.5 * np.sum(np.square(err))
@@ -120,26 +105,23 @@ class MLP:
                 nbTrue += 1 
         return 100*(nbTrue / len(D))
 
+
     def backprop(self):
 
-        dZ =  {}
-        dW = {}
-        for i in range(len(self.W)-1, -1, -1):
-            if(i == len(self.W) - 1):
-                dZ[i] =  self.calc_error()
-            else:
-                dZ[i] = np.multiply(np.dot(rem_1st_c(self.W[i+1]).T, dZ[i+1]), sigmoid_deriv(self.C[i]))
-            
-            if(i == 0):
-                inputLayer = self.X
-            else:
-                inputLayer = self.C[i-1]
-            dW[i] = np.dot(dZ[i], add_1_r(inputLayer).T)
+        dZ3  = self.calc_error()
+        dW3  = np.dot(dZ3, add_1_r(self.C2).T)
+
+        dZ2  = np.multiply(np.dot(rem_1st_c(self.W3).T, dZ3), sigmoid_deriv(self.C2))
+        dW2  = np.dot(dZ2, add_1_r(self.C1).T)
+
+        dZ1  = np.multiply(np.dot(rem_1st_c(self.W2).T, dZ2), sigmoid_deriv(self.C1))
+        dW1  = np.dot(dZ1, add_1_r(self.X).T)
 
         r = self.learning_rate
+        self.W1  += r * dW1
+        self.W2  += r * dW2
+        self.W3  += r * dW3
         
-        for i  in range(0, len(self.W)):
-            self.W[i] = self.W[i] + r * dW[i] 
 
       
     @calculate_time
@@ -148,23 +130,14 @@ class MLP:
             self.feedforward()
             self.backprop()
             # print(self.W)
+     
     
     def predict(self, X, D):
         self.X = X.T
         self.D = D
         self.feedforward()
-
-        # print('Predicted   Desired  Result')
-        Y = np.round(np.squeeze(self.Y))
-        D = np.squeeze(self.D)
-        nbTrue = 0
-        for i in range(len(D)):
-            result = Y[i] == D[i]
-            if(result):
-                nbTrue += 1 
-        #     print('%d ... %d ... %d'%(Y[i], D[i], result))
-        # print('Accuracy = %d / 100'% (100*(nbTrue / len(D))))
-        return 100*(nbTrue / len(D))
+        return self.calc_acc()
+        
 
     def plotErrors(self):
         errors = self.costs
@@ -173,7 +146,7 @@ class MLP:
         plt.xlabel('iteration')
         plt.ylabel('Error')
         plt.show()
-        
+    
     def plotAcc(self):
         accus = self.accus
         plt.plot(accus);
@@ -181,6 +154,3 @@ class MLP:
         plt.xlabel('iteration')
         plt.ylabel('Accuracy')
         plt.show()
-
-
-

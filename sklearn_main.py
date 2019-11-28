@@ -17,8 +17,8 @@ D = train.loc[:, dataFrame.columns == 'CLASS'].values
 D = np.squeeze(D)
 
 # create mutli-layer perceptron classifier
-clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
-                    hidden_layer_sizes=(8,8), random_state=1)
+clf = MLPClassifier(solver='lbfgs', alpha=0.1,
+                    hidden_layer_sizes=(3,5), random_state=1)
 
 # train
 clf.fit(X, D)
