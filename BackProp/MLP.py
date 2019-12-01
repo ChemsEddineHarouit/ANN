@@ -23,6 +23,8 @@ class MLP(object):
 
 
     def train(self, X, D, ITERATIONS = 1000):
+        self.accus = []
+        self.errors = []
         for i in range(ITERATIONS):
             self.train_once(X, D)
             if(i%100 == 0):
@@ -53,24 +55,22 @@ class MLP(object):
         for i,W in self.W.items():
             Zi   = np.dot(C[i-1], W)
             if(i == self.last_layer):
-                C[i] = Zi
+                C[i] = Zi #activation function here is f(x) = x
             else:
                 C[i] = self.sigmoid(Zi)
 
         return C
 
     def backpropagation(self, C, X, y, dW):
-
-        error = {}
-        error_term = {}
+        dC = {}
         for i in range(self.last_layer, 0, -1):
             if(i == self.last_layer):
-                error[i]      = y - C[i]
-                error_term[i] = error[i]
+                error      = y - C[i]
+                dC[i] = error #because df/dx = x (last layer the activation function f(x) = x)
             else:
-                error[i]      = np.dot(error[i+1], self.W[i+1].T)
-                error_term[i] = error[i] * self.sigmoid_deriv(C[i])
-            dW[i]  = dW[i]  + error_term[i] * C[i-1][:, None]
+                error      = np.dot(dC[i+1], self.W[i+1].T)
+                dC[i] = error * self.sigmoid_deriv(C[i])
+            dW[i]  = dW[i]  + dC[i] * C[i-1][:, None]
         return dW
 
     def update_weights(self, dW, N):

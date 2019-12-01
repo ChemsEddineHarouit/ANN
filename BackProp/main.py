@@ -13,11 +13,15 @@ D = dataFrame.get('target')
 
 
 #Train and Test set
-np.random.seed(2)
+np.random.seed()
 mask = np.random.rand(len(X)) < 0.8
 trainData = trainX, trainD = X[mask], D[mask]
 testData = testX , testD  = X[~mask], D[~mask]
-
+inputShape = np.shape(X)[1]
+if(np.ndim(D) > 1):
+    outputShape = np.shape(D)[1]
+else:
+    outputShape = 1
 
 # #################### XOR
 # trainX = np.array([[0,0], [0,1], [1,0], [1,1]])
@@ -25,16 +29,13 @@ testData = testX , testD  = X[~mask], D[~mask]
 
 
 #Create the Neural Network and train it
-nn = NeuralNetwork([4, 7, 5, 1], 0.1)
-nn.errors = []
-nn.accurs = []
-
+nn = NeuralNetwork([inputShape, 2, 5, outputShape], 0.1)
 nn.train(X, D, 1000)
 
 #Predict
 Y = nn.run(testX, testD)
 
-print('Accuracy : %d, Error : %d'% (nn.accus[-1], nn.errors[-1]))
+print('Accuracy : %d %%, Error : %f'% (nn.accus[-1], nn.errors[-1]))
 
 nn.plotAcc()
 nn.plotErrors()

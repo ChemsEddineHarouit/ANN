@@ -60,7 +60,7 @@ class MLP_3:
         W1, W2 = self.getAllParams()
         self.C1 = f(np.dot(W1, add_ones(self.X)))
         self.C2 = f(np.dot(W2, add_ones(self.C1)))
-        self.Y  = self.C2
+        self.Y  = np.squeeze(self.C2)
 
     @calculate_time
     def train(self):
